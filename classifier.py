@@ -10,23 +10,44 @@ def distance(item1, item2):
     return final_distance
 
 
-def min_max_normalize(lst):
-    # Converts data to a value between 0 - 1
+def min_max_normalize(dict):
+    # Converts data in dictionary to values between 0 - 1
     getcontext().prec = 15
-    minimum = min(lst)
-    maximum = max(lst)
-    normalized_values = []
-    for x in lst:
-        normalized_values.append(float(Decimal(x-minimum) / Decimal(maximum-minimum)))
-    return normalized_values
+    fields_count = len(dict[list(dict.keys())[0]])
+
+    # For each column in dataset:
+    for i in range(fields_count):
+
+         # Find minimum:
+        minimum = Decimal('Infinity')
+        for key in dict.keys():
+            if (dict[key][i] < minimum):
+                minimum = dict[key][i]
+
+        # Find maximum:
+        maximum = Decimal('-Infinity')
+        for key in dict.keys():
+            if (dict[key][i] > maximum):
+                maximum = dict[key][i]
+
+        # Normalize each value:
+        for key in dict.keys():
+            dict[key][i] = float(Decimal(dict[key][i]-minimum) / Decimal(maximum-minimum))
+
+    return dict
 
 
 def classify(unknown, dataset, labels, k):
     # First determine distance to all items in dataset
     distances = []
-    for item in dataset:
-        data_point = min_max_normalize(dataset[item])
-        norm_unknown = min_max_normalize(unknown)
+
+    # Normalize dataset with unknown, then separate unknown:
+    dataset["unknown"] = unknown
+    normalized_data = min_max_normalize(dataset)
+    norm_unknown = normalized_data.pop("unknown")
+
+    for item in normalized_data:
+        data_point = normalized_data[item]
         distance_to_point = distance(data_point, norm_unknown)
         distances.append([distance_to_point, item])
     distances.sort()
