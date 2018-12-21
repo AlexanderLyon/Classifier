@@ -15,18 +15,14 @@ def min_max_normalize(dict):
     getcontext().prec = 15
     fields_count = len(dict[list(dict.keys())[0]])
 
-    # For each column in dataset:
     for i in range(fields_count):
 
-         # Find minimum:
+         # Find minimum and maximum values:
         minimum = Decimal('Infinity')
+        maximum = Decimal('-Infinity')
         for key in dict.keys():
             if (dict[key][i] < minimum):
                 minimum = dict[key][i]
-
-        # Find maximum:
-        maximum = Decimal('-Infinity')
-        for key in dict.keys():
             if (dict[key][i] > maximum):
                 maximum = dict[key][i]
 
@@ -38,10 +34,9 @@ def min_max_normalize(dict):
 
 
 def classify(unknown, dataset, labels, k):
-    # First determine distance to all items in dataset
     distances = []
 
-    # Normalize dataset with unknown, then separate unknown:
+    # Include unknown with data to be normalized:
     dataset["unknown"] = unknown
     normalized_data = min_max_normalize(dataset)
     norm_unknown = normalized_data.pop("unknown")
@@ -52,8 +47,8 @@ def classify(unknown, dataset, labels, k):
         distances.append([distance_to_point, item])
     distances.sort()
 
-    # Then take only the k closest points
-    neighbors = distances[0:k]
+    # Take only the k closest points
+    neighbors = distances[:k]
     group1 = 0
     group2 = 0
     for neighbor in neighbors:
